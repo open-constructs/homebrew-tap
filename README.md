@@ -60,12 +60,61 @@ Then re-run `brew link cdktn`.
 
 **Install size feels large for a CLI.** The stable (npm) path is ~400 MB and the `--HEAD` path is ~1.5 GB. Both ship the CLI's runtime `node_modules` because the CLI is a partial esbuild bundle that loads several dependencies (`cdktn`, `@cdktn/hcl2cdk`, `constructs`, `yargs`, ...) at runtime rather than inlining them.
 
-## Contributing
+## Testing locally from the tap source
 
-Version bumps, bug reports, and PRs welcome. To test a formula change locally:
+To iterate on a formula change without pushing to GitHub, point Homebrew at a local clone of this repo:
+
+```sh
+git clone https://github.com/open-constructs/homebrew-tap.git
+cd homebrew-tap
+
+# Register this working copy as the `open-constructs/tap` tap.
+# (If the tap is already tapped from GitHub, untap first: `brew untap open-constructs/tap`)
+brew tap open-constructs/tap "$(pwd)"
+```
+
+Now `open-constructs/tap/cdktn` resolves to `./Formula/cdktn.rb` in your working copy. Edits to the file are picked up immediately — no commit, no push.
+
+### Audit
 
 ```sh
 brew audit --new --strict --online open-constructs/tap/cdktn
-brew install --build-from-source open-constructs/tap/cdktn
+```
+
+`--new` applies stricter rules (used for formulae new to a tap). `--online` fetches the `url`/`head` to verify they resolve. Exit 0 means clean.
+
+### Install — stable (npm)
+
+```sh
+brew install open-constructs/tap/cdktn
+cdktn --version   # should print the formula's version
+```
+
+Add `--verbose` to see every step. Add `--build-from-source` to force the `def install` block to run locally (meaningless for this formula today since it has no bottles, but useful later).
+
+### Install — `--HEAD` (source build from cdk-terrain main)
+
+```sh
+brew install --HEAD open-constructs/tap/cdktn
+```
+
+Builds from `github.com/open-constructs/cdk-terrain` `main`. Expect ~2 min and ~1.5 GB on disk.
+
+### Run the formula's test block
+
+```sh
 brew test cdktn
 ```
+
+Requires the formula to be `brew link`-ed. If linking is blocked by a conflict (see Troubleshooting above), either resolve the conflict or read the `test do` block in [`Formula/cdktn.rb`](./Formula/cdktn.rb) and invoke its assertions by hand against `/opt/homebrew/Cellar/cdktn/<version>/bin/cdktn`.
+
+### Cleanup
+
+```sh
+brew uninstall cdktn
+brew untap open-constructs/tap
+```
+
+## Contributing
+
+Version bumps, bug reports, and PRs welcome. Please run the audit and both install paths above before opening a PR.
