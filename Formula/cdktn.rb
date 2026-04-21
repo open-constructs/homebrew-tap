@@ -34,6 +34,15 @@ class Cdktn < Formula
       # symlink its bin entrypoint into the formula's bin.
       system "npm", "install", *std_npm_args
       bin.install_symlink libexec.glob("bin/*")
+
+      # Prune non-native prebuilds from bare-* transitive deps (holepunch
+      # runtime, shipped via an indirect dep). brew audit --strict rejects
+      # the foreign-arch .bare binaries inside an arm64/x86_64 install, and
+      # the cdktn CLI never exercises them.
+      os_arch = "#{OS.mac? ? "darwin" : "linux"}-#{Hardware::CPU.arm? ? "arm64" : "x64"}"
+      libexec.glob("lib/node_modules/*/node_modules/bare-*/prebuilds/*").each do |d|
+        d.rmtree if d.directory? && d.basename.to_s != os_arch
+      end
     end
   end
 
