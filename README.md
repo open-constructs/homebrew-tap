@@ -28,12 +28,28 @@ Community fork of the deprecated `cdktf` (CDK for Terraform) formula.
 - **Current version:** 0.22.1 (tracks the [`cdktn-cli`](https://www.npmjs.com/package/cdktn-cli) npm release)
 - **Source:** [`open-constructs/cdk-terrain`](https://github.com/open-constructs/cdk-terrain)
 - **License:** MPL-2.0
-- **Dependencies:** `node@20`, `terraform`, `yarn` (build-time)
+- **Dependencies:** `node@20`, `yarn` (build-time). A Terraform-compatible binary (`hashicorp/tap/terraform` or `opentofu`) is required at runtime but **not** enforced by the formula — see [Runtime: Terraform or OpenTofu](#runtime-terraform-or-opentofu).
 - **Formula:** [`Formula/cdktn.rb`](./Formula/cdktn.rb)
 
 **Stable** (`brew install cdktn`): installs the prebuilt [`cdktn-cli`](https://www.npmjs.com/package/cdktn-cli) npm tarball — ~400 MB, ~30 sec.
 
 **Bleeding-edge** (`brew install --HEAD cdktn`): builds from the `cdk-terrain` main branch via `yarn build` (full monorepo, tsc + jsii) — ~1.5 GB, ~2 min.
+
+### Runtime: Terraform or OpenTofu
+
+`cdktn` shells out to a Terraform-compatible binary. Homebrew's core `terraform` formula was removed after Hashicorp relicensed it (BSL, August 2023), so this tap does not pin a choice — install whichever you prefer:
+
+```sh
+brew install hashicorp/tap/terraform   # upstream Terraform (BSL)
+# — or —
+brew install opentofu                  # OpenTofu (MPL-2.0) — community fork
+```
+
+If you use OpenTofu, tell cdktn to invoke the `tofu` binary:
+
+```sh
+export TERRAFORM_BINARY_NAME=tofu
+```
 
 ### Migrating from `cdktf`
 

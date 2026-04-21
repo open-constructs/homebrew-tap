@@ -9,7 +9,6 @@ class Cdktn < Formula
 
   depends_on "yarn" => :build
   depends_on "node@20"
-  depends_on "terraform"
 
   def install
     if build.head?
@@ -40,8 +39,15 @@ class Cdktn < Formula
 
   def caveats
     <<~EOS
-      cdktn shells out to `terraform` at runtime — installed as a dependency
-      and available on PATH.
+      cdktn shells out to a Terraform-compatible binary at runtime. Homebrew's
+      core `terraform` formula was removed after Hashicorp relicensed it (BSL,
+      August 2023), so this formula does not force a choice. Install one of:
+
+        brew install hashicorp/tap/terraform   # upstream Terraform (BSL)
+        brew install opentofu                  # OpenTofu (MPL-2.0) — open-source fork
+
+      If you use OpenTofu, point cdktn at the `tofu` binary:
+        export TERRAFORM_BINARY_NAME=tofu
 
       On first use, `cdktn init` may download additional language toolchains
       (Python, Go, Java, .NET) depending on the target language of your project.
